@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Music Swipe</string>
+    <string name="accessibility_service_description">Detects left-to-right swipe from the left edge to show the music panel</string>
+
+    <string name="overlay_permission">Overlay permission</string>
+    <string name="accessibility_service">Accessibility service</string>
+    <string name="notification_access">Notification access</string>
+    <string name="permission_granted">Granted</string>
+    <string name="permission_not_granted">Not granted</string>
+    <string name="permission_already_granted">Already granted</string>
+    <string name="grant_overlay_permission">Grant overlay permission</string>
+    <string name="open_accessibility_settings">Open accessibility settings</string>
+    <string name="open_notification_settings">Grant notification access</string>
+    <string name="pick_player">Pick player</string>
+    <string name="player_selected">Selected: %1$s</string>
+    <string name="no_player_selected">No player selected</string>
+    <string name="enable_notification_access">Enable notification access first</string>
+    <string name="cannot_open_settings">Cannot open settings</string>
+
+    <string name="unknown_title">Unknown title</string>
+    <string name="unknown_artist">Unknown artist</string>
+
+    <string name="play_pause">Play/Pause</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+    <string name="close">Close</string>
+    <string name="album_art">Album art</string>
+
+    <string name="notification_title">Music Swipe active</string>
+    <string name="notification_text">Swipe from the left edge to open the player</string>
+</resources>
