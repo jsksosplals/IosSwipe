@@ -1,0 +1,66 @@
+name: Fix structure
+
+on:
+  workflow_dispatch:
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Restructure
+        run: |
+          set -euo pipefail
+
+          echo "=== BEFORE ==="
+          ls -la
+
+          mkdir -p app/src/main/java/com/example/musicswipe
+          mkdir -p app/src/main/res
+
+          # Move Kotlin sources from root into the package directory
+          for f in *.kt; do
+            [ -e "$f" ] || continue
+            mv -f "$f" app/src/main/java/com/example/musicswipe/
+            echo "Moved $f"
+          done
+
+          # Merge root res/ into app/src/main/res/
+          if [ -d res ]; then
+            cp -rf res/. app/src/main/res/
+            rm -rf res
+            echo "Merged res/ -> app/src/main/res/"
+          fi
+
+          # Fix typo: grade -> gradle
+          if [ -d grade ]; then
+            mkdir -p gradle
+            cp -rf grade/. gradle/
+            rm -rf grade
+            echo "Merged grade/ -> gradle/"
+          fi
+
+          echo "=== AFTER ==="
+          ls -la
+          echo "--- app/src/main ---"
+          ls -la app/src/main || true
+          echo "--- app/src/main/java/com/example/musicswipe ---"
+          ls -la app/src/main/java/com/example/musicswipe || true
+          echo "--- app/src/main/res ---"
+          ls -la app/src/main/res || true
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Nothing to commit"
+          else
+            git commit -m "Restructure project to standard Android layout"
+            git push
+          fi
