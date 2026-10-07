@@ -104,7 +104,8 @@ class OverlayService : Service() {
         panelView = panel
 
         val metrics = resources.displayMetrics
-        panelWidth = (metrics.widthPixels * 0.85f).coerceAtMost(dp(360)).toInt()
+        val maxWidth = dp(360)
+        panelWidth = (metrics.widthPixels * 0.85f).coerceAtMost(maxWidth.toFloat()).toInt()
 
         val params = WindowManager.LayoutParams(
             panelWidth,
@@ -134,7 +135,8 @@ class OverlayService : Service() {
             windowManager.addView(panel, params)
         } catch (e: Exception) {
             Log.e(TAG, "addView failed", e)
-            panelView = null; binding = null
+            panelView = null
+            binding = null
             stopSelf()
             return
         }
@@ -187,7 +189,9 @@ class OverlayService : Service() {
 
     private fun removePanelImmediate() {
         panelView?.let {
-            try { windowManager.removeView(it) } catch (e: Exception) {
+            try {
+                windowManager.removeView(it)
+            } catch (e: Exception) {
                 Log.e(TAG, "removeView failed", e)
             }
         }
