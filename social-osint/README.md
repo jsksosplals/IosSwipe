@@ -1,22 +1,21 @@
 # Social OSINT
 
-A small evidence-first workspace for verifying public claims using public YouTube search and public Mastodon status search.
+A Russian-language, evidence-first workspace for reviewing public search results and documenting sources. The site does not use YouTube APIs or require API keys.
 
 ## Features
-- YouTube Data API search via a Vercel serverless function; the API key remains server-side.
-- Public Mastodon status search on a user-selected instance; availability depends on that instance's indexing and CORS policy.
-- Evidence ledger with source URL, publication date, notes, assessment status, and JSON export.
-- No scraping of private accounts, private-person profiling, location inference, or relationship inference.
+- Public keyword search links for Mastodon, Reddit, Bluesky, GitHub, X, and DuckDuckGo.
+- Public Mastodon status search on a user-selected instance; availability depends on the instance's search policy and browser CORS support.
+- Self-audit search links for your own public username or a project/organization name. These open platform search pages; the app does not automatically confirm account existence or correlate profiles.
+- Evidence journal with source URL, publication date, notes, assessment status, add-from-Mastodon flow, JSON export/import, and deletion.
+- Journal stored in the current browser's localStorage. It is not a shared database and does not sync across devices.
+- No private-account scraping, login bypass, personal location inference, or relationship inference.
 
 ## Deployment
-The app is deployed on Vercel from a direct source deployment. To enable automatic deployments on GitHub pushes, connect the GitHub integration in Vercel and link the repository `jsksosplals/IosSwipe` with root directory `social-osint`.
-
-Add the environment variable `YOUTUBE_API_KEY` in Vercel Project Settings → Environment Variables for Production (and Preview if needed). Never place this key in frontend code or commit it to Git.
+The static page is deployed on Vercel. The app does not require API keys. GitHub automatic deployments are not connected yet; until the GitHub integration is linked in Vercel, publish changes with a direct deployment.
 
 ## Files
-- `index.html`: static UI and evidence ledger.
-- `api/youtube-search.js`: Vercel serverless API route.
-- `netlify/functions/youtube-search.mjs` and `netlify.toml`: optional Netlify-compatible deployment path.
+- `index.html`: UI, public-source search links, Mastodon search, and local evidence journal.
+- `netlify.toml`: optional static-site settings for Netlify.
 
 ## Evidence practice
-Record direct URLs, preserve publication dates and context, and distinguish what a source directly establishes from interpretation. A search result is a lead, not independent verification. Keep exported evidence files secure and remove unrelated personal data.
+Treat search results as leads, not proof. Check original context, dates, and independent sources. Export journal backups periodically and keep them secure.
