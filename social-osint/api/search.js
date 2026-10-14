@@ -1,6 +1,7 @@
 const json = (body, status=200) => new Response(JSON.stringify(body), {status, headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store"}});
 export default async function handler(request) {
-  const url = new URL(request.url);
+  const base = "https://" + (request.headers.get("host") || "social-osint-xgame.vercel.app");
+  const url = new URL(request.url, base);
   const q = (url.searchParams.get("q") || "").trim();
   if (!q) return json({error:"Query is required",results:[]},400);
   if (q.length > 180) return json({error:"Query too long",results:[]},400);
