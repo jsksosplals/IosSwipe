@@ -25,7 +25,46 @@ export async function GET(request) {
   if (!q) return json({ error: "Введите имя или ID профиля." }, 400);
   if (q.length > 120) return json({ error: "Запрос слишком длинный." }, 400);
   const token = process.env.VK_ACCESS_TOKEN;
-  if (!token) return json({ error: "Не настроен VK_ACCESS_TOKEN. Добавьте токен в Vercel → Project Settings → Environment Variables и повторно разверните приложение." }, 503);
+  // Без токена не делаем прямые вызовы VK API; используем публичную веб-индексацию как резерв.
+  if (!token) {
+    try {
+      const query = /^(?:id)?\\d+$/i.test(q)
+        ? 'site:vk.com ' + q
+        : 'site:vk.com ' + q;
+      const response = await fetch("https://www.bing.com/search?format=rss&q=" + encodeURIComponent(query), {
+        headers: { accept: "application/rss+xml,application/xml,text/xml", "user-agent": "Mozilla/5.0 (compatible; PublicSourceSearch/1.0)" },
+        signal: AbortSignal.timeout(9000)
+      });
+      if (!response.ok) throw new Error("Веб-поиск недоступен (HTTP " + response.status + ")");
+      const xml = await response.text();
+      const items = [];
+      for (const m of xml.matchAll(/<item>([\\s\\S]*?)<\\/item>/gi)) {
+        const block = m[1];
+        const value = tag => {
+          const hit = block.match(new RegExp("<" + tag + ">([\\\\s\\\\S]*?)<\\/" + tag + ">", "i"));
+          return hit ? hit[1].replace(/^<!\\[CDATA\\[|\\]\\]>$/g, "").replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&#39;/g, "'").trim() : "";
+        };
+        const title = value("title"), link = value("link"), description = value("description"), pubDate = value("pubDate");
+        if (!title || !/^https?:\\/\\/(?:www\\.)?vk\\.com\\//i.test(link)) continue;
+        const profileMatch = link.match(/^https?:\\/\\/(?:www\\.)?vk\\.com\\/([^/?#]+)/i);
+        const wallMatch = link.match(/wall(-?\\d+_\\d+)/i);
+        if (wallMatch) {
+          items.push({ owner_name: title, date: pubDate ? new Date(pubDate).toISOString() : "", text: description, url: link });
+        } else if (profileMatch) {
+          const screen = profileMatch[1];
+          items.push({ id: /^id\\d+$/.test(screen) ? Number(screen.slice(2)) : screen, name: title, screen_name: screen, city: "", country: "", url: link });
+        }
+      }
+      const profiles = [...new Map(items.filter(x => x.screen_name).map(x => [x.url, x])).values()].slice(0, 10);
+      const posts = [...new Map(items.filter(x => x.owner_name).map(x => [x.url, x])).values()].slice(0, 20);
+      return json({
+        query: q, mode: /^(?:id)?\\d+$/i.test(q) ? "id" : "name", profiles, posts,
+        notice: "Резервный режим веб-поиска: показаны только проиндексированные публичные страницы VK. Для прямого поиска через VK API и более полных результатов настройте VK_ACCESS_TOKEN."
+      });
+    } catch (e) {
+      return json({ error: "VK API-токен не настроен, а резервный веб-поиск не сработал: " + String(e.message || e), hint: "Добавьте VK_ACCESS_TOKEN в Vercel для прямого поиска." }, 503);
+    }
+  }
   const numeric = /^(?:id)?(\d+)$/i.exec(q);
   const short = /^([a-z][a-z0-9_.]{1,48})$/i.exec(q);
   let profiles = [], mode = "name";
